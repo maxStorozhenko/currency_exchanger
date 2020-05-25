@@ -319,14 +319,14 @@ def parse_alfabank():
         '/html/body/main/section[4]/div/div[4]/div[1]/div[2]/div[1]/div[2]/span')[0].text.strip('\t\n '))
 
     last = Rate.objects.filter(
-        source=mch.SOURCE_CREDIT_DNIPRO,
+        source=mch.SOURCE_ALFA_BANK,
         currency_type=mch.CURRENCY_TYPE_USD,
         rate_type=mch.RATE_TYPE_BUY,
     ).last()
 
     if last is None or last.rate != usd_buy:
         Rate.objects.create(
-            source=mch.SOURCE_CREDIT_DNIPRO,
+            source=mch.SOURCE_ALFA_BANK,
             rate=usd_buy,
             currency_type=mch.CURRENCY_TYPE_USD,
             rate_type=mch.RATE_TYPE_BUY
@@ -337,14 +337,14 @@ def parse_alfabank():
                          )
 
     last = Rate.objects.filter(
-        source=mch.SOURCE_CREDIT_DNIPRO,
+        source=mch.SOURCE_ALFA_BANK,
         currency_type=mch.CURRENCY_TYPE_EUR,
         rate_type=mch.RATE_TYPE_BUY,
     ).last()
 
     if last is None or last.rate != eur_buy:
         Rate.objects.create(
-            source=mch.SOURCE_CREDIT_DNIPRO,
+            source=mch.SOURCE_ALFA_BANK,
             rate=eur_buy,
             currency_type=mch.CURRENCY_TYPE_EUR,
             rate_type=mch.RATE_TYPE_BUY
@@ -356,14 +356,14 @@ def parse_alfabank():
                           )
 
     last = Rate.objects.filter(
-        source=mch.SOURCE_CREDIT_DNIPRO,
+        source=mch.SOURCE_ALFA_BANK,
         currency_type=mch.CURRENCY_TYPE_USD,
         rate_type=mch.RATE_TYPE_SALE,
     ).last()
 
     if last is None or last.rate != usd_sale:
         Rate.objects.create(
-            source=mch.SOURCE_CREDIT_DNIPRO,
+            source=mch.SOURCE_ALFA_BANK,
             rate=usd_sale,
             currency_type=mch.CURRENCY_TYPE_USD,
             rate_type=mch.RATE_TYPE_SALE
@@ -374,14 +374,14 @@ def parse_alfabank():
                           )
 
     last = Rate.objects.filter(
-        source=mch.SOURCE_CREDIT_DNIPRO,
+        source=mch.SOURCE_ALFA_BANK,
         currency_type=mch.CURRENCY_TYPE_EUR,
         rate_type=mch.RATE_TYPE_SALE,
     ).last()
 
     if last is None or last.rate != eur_sale:
         Rate.objects.create(
-            source=mch.SOURCE_CREDIT_DNIPRO,
+            source=mch.SOURCE_ALFA_BANK,
             rate=eur_sale,
             currency_type=mch.CURRENCY_TYPE_EUR,
             rate_type=mch.RATE_TYPE_SALE
