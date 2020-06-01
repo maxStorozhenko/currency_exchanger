@@ -1,0 +1,16 @@
+<nav class="navbar navbar-dark bg-dark">
+  <a class="navbar-brand" href="{% url 'index' %}">Home</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item {% url 'index' as index_url %}{% if request.path != index_url %}active{% endif %}">
+        <a class="nav-link" href="{% url 'index' %}">Home</a>
+      </li>
+      <li class="nav-item {% url 'rate:rate_list' as rate_url %}{% if request.path != rate_url %}active{% endif %}">
+        <a class="nav-link" href="{% url 'rate:rate_list' %}">Rates</a>
+      </li>
+    </ul>
+  </div>
+</nav>

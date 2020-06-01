@@ -1,3 +1,8 @@
-from django.shortcuts import render  # noqa autoimported by Django
+from django.views.generic import ListView
 
-# Create your views here.
+from rate.models import Rate
+
+
+class RateList(ListView):
+    queryset = Rate.objects.all()
+    template_name = 'rate-list.html'

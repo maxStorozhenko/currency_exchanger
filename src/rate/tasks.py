@@ -146,7 +146,7 @@ def parse_vkurse():
             )
 
         # sale
-        rate = to_decimal(response[item]['sale'])
+        rate = to_decimal(response[item]['sale'][:-1])
         last = Rate.objects.filter(
             source=mch.SOURCE_VKURSE,
             currency_type=currency_type,
@@ -202,7 +202,7 @@ def parse_o_o_kharkiv():
         )
 
     # sale
-    usd_sale = to_decimal(html_tree.xpath('//*[@id="retail"]/div[2]/div[2]/div/text()')[0])
+    usd_sale = to_decimal(html_tree.xpath('//*[@id="retail"]/div[2]/div[3]/div/text()')[0])
 
     last = Rate.objects.filter(
         source=mch.SOURCE_O_O_KHARKIV,
@@ -218,7 +218,7 @@ def parse_o_o_kharkiv():
             rate_type=mch.RATE_TYPE_SALE
         )
 
-    eur_sale = to_decimal(html_tree.xpath('//*[@id="retail"]/div[3]/div[2]/div/text()')[0])
+    eur_sale = to_decimal(html_tree.xpath('//*[@id="retail"]/div[3]/div[3]/div/text()')[0])
 
     last = Rate.objects.filter(
         source=mch.SOURCE_O_O_KHARKIV,
