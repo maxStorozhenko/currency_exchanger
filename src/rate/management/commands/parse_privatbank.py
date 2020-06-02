@@ -39,33 +39,23 @@ class Command(BaseCommand):
                 rate = to_decimal(item['purchaseRate']) if 'purchaseRate' in item else to_decimal(
                     item['purchaseRateNB'])
 
-                Rate.objects.create(rate=rate,
-                                    source=mch.SOURCE_PRIVATBANK,
-                                    currency_type=currency_type,
-                                    rate_type=mch.RATE_TYPE_BUY,
-                                    )
-
-                last = Rate.objects.filter(source=mch.SOURCE_PRIVATBANK,
+                rate = Rate.objects.create(rate=rate,
+                                           source=mch.SOURCE_PRIVATBANK,
                                            currency_type=currency_type,
                                            rate_type=mch.RATE_TYPE_BUY,
-                                           ).last()
+                                           )
 
-                last.created = single_date
-                last.save()
+                rate.created = single_date
+                rate.save()
 
                 # sale
                 rate = to_decimal(item['saleRate']) if 'saleRate' in item else to_decimal(item['saleRateNB'])
 
-                Rate.objects.create(rate=rate,
-                                    source=mch.SOURCE_PRIVATBANK,
-                                    currency_type=currency_type,
-                                    rate_type=mch.RATE_TYPE_SALE,
-                                    )
-
-                last = Rate.objects.filter(source=mch.SOURCE_PRIVATBANK,
+                rate = Rate.objects.create(rate=rate,
+                                           source=mch.SOURCE_PRIVATBANK,
                                            currency_type=currency_type,
                                            rate_type=mch.RATE_TYPE_SALE,
-                                           ).last()
+                                           )
 
-                last.created = single_date
-                last.save()
+                rate.created = single_date
+                rate.save()

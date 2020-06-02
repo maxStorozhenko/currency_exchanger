@@ -70,15 +70,13 @@ class RateDownloadXLSX(View):
         for i, column in enumerate(self.__class__.HEADERS):
             sheet.write(0, i, column)
 
-        i = 1
-        for rate in self.queryset:
+        for i, rate in enumerate(self.queryset, start=1):
             values = []
             for attr in self.__class__.HEADERS:
                 values.append(display(rate, attr))
 
             for j, value in enumerate(values):
                 sheet.write(i, j, value)
-            i += 1
 
         book.close()
 
