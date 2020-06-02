@@ -1,14 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}Rates{% endblock title %}
+{% block title %}Latest Rates{% endblock title %}
 
 {% block content %}
-	<br>
-	<a href="{% url 'rate:download-csv' %}" class="btn btn-dark btn-lg active" role="button" aria-pressed="true">Download CSV</a>
-	<a href="{% url 'rate:download-xlsx' %}" class="btn btn-dark btn-lg active" role="button" aria-pressed="true">Download XLSX</a>
-	<br><br>
-
-	<table class="table">
+<table class="table">
   <thead class="thead-dark">
     <tr>
       <th scope="col">#</th>
