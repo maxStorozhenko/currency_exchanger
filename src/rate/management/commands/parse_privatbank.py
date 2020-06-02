@@ -18,7 +18,7 @@ class Command(BaseCommand):
     help = 'Parse rates from 2015 till now from PrivatBank archive'  # noqa  django requires 'help'
 
     def handle(self, *args, **options):
-        start_date = date(2017, 11, 1)
+        start_date = date(2015, 1, 1)
         end_date = date.today()
 
         currency_type_mapper = {
