@@ -1,7 +1,11 @@
 from django.db import models
+from django.utils import timezone
 
 from rate import model_choices as mch
 from rate.utils import to_decimal
+
+
+tz = timezone.get_default_timezone()
 
 
 class Rate(models.Model):
@@ -14,3 +18,6 @@ class Rate(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.rate = to_decimal(self.rate)
+
+    def get_date(self):
+        return f'{self.created.astimezone(tz).strftime("%d.%m.%Y %H:%M")}'

@@ -146,7 +146,7 @@ def parse_vkurse():
             )
 
         # sale
-        rate = to_decimal(response[item]['sale'][:-1])
+        rate = to_decimal(response[item]['sale'])
         last = Rate.objects.filter(
             source=mch.SOURCE_VKURSE,
             currency_type=currency_type,
