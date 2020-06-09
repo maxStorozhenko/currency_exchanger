@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}User edit{% endblock title %}
+
+{% block content %}
+	<br><div class="d-flex justify-content-center border border-dark rounded">My profile</div><br>
+	<form method="post">
+	{% csrf_token %}
+		{{ form|crispy }}
+		<button class="btn btn-dark" type="submit">Save</button>
+	</form>
+{% endblock content %}

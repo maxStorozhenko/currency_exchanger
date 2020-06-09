@@ -4,7 +4,8 @@
 
 {% block content %}
 <div class="row">
-    <div class="col">Hello</div>
-    <div class="col">World</div>
+    <div class="col">
+		{{ request.user.is_authenticated }}
+	</div>
 </div>
 {% endblock content %}

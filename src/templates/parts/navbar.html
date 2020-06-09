@@ -1,34 +1,39 @@
+{% load active_tab %}
+
 <nav class="navbar navbar-dark bg-dark">
-  <a class="navbar-brand" href="{% url 'index' %}">Home</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarText">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item {% url 'index' as index_url %}{% if request.path == index_url %}active{% endif %}">
-        <a class="nav-link" href="{% url 'index' %}">Home</a>
-      </li>
-      <li class="nav-item {% url 'rate:rate_list' as rate_url %}{% if request.path == rate_url %}active{% endif %}">
-        <a class="nav-link" href="{% url 'rate:rate_list' %}">Rates</a>
-      </li>
-	  <li class="nav-item {% url 'rate:latest-rates' as latest_rate_url %}{% if request.path == latest_rate_url %}active{% endif %}">
-		<a class="nav-link" href="{% url 'rate:latest-rates' %}">Latest Rates</a>
-      </li>
-      {% if request.user.is_authenticated %}
-        <li class="nav-item">
-            <a class="nav-link" href="#">My Profile</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Logout</a>
-        </li>
-      {% else %}
-        <li class="nav-item">
-            <a class="nav-link" href="#">Sign Up</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Login</a>
-        </li>
-        {% endif %}
-    </ul>
-  </div>
+	<a class="navbar-brand" href="{% url 'index' %}">Home</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarText">
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item {{ request.path|active:'index' }}">
+				<a class="nav-link" href="{% url 'index' %}">Home</a>
+			</li>
+			<li class="nav-item {{  request.path|active:'rate:rate_list' }}">
+				<a class="nav-link" href="{% url 'rate:rate_list' %}">Rates</a>
+			</li>
+			<li class="nav-item {{ 'rate:latest-rates' }}">
+				<a class="nav-link" href="{% url 'rate:latest-rates' %}">Latest Rates</a>
+			</li>
+			<li class="nav-item {{ 'account:contact-us' }}">
+				<a class="nav-link" href="{% url 'account:contact-us' %}">Contact Us</a>
+			</li>
+			{% if request.user.is_authenticated %}
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'account:profile' %}">My Profile</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'account:logout' %}">Logout</a>
+				</li>
+			{% else %}
+				<li class="nav-item">
+					<a class="nav-link" href="#">Sign Up</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'account:login' %}">Login</a>
+				</li>
+			{% endif %}
+		</ul>
+	</div>
 </nav>
