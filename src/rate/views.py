@@ -1,7 +1,8 @@
 import csv
 
 from django.http import HttpResponse
-from django.views.generic import ListView, TemplateView, View
+from django.urls import reverse_lazy
+from django.views.generic import DeleteView, ListView, TemplateView, UpdateView, View
 
 from rate.models import Rate
 from rate.selectors import get_latest_rates
@@ -11,6 +12,7 @@ import xlsxwriter
 
 
 class RateList(ListView):
+    paginate_by = 24
     queryset = Rate.objects.all()
     template_name = 'rate-list.html'
 
@@ -96,3 +98,18 @@ class LatestRatesView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['object_list'] = get_latest_rates()
         return context
+
+
+class EditRate(UpdateView):
+    template_name = 'edit-rate.html'
+    model = Rate
+    fields = 'rate', 'source', 'currency_type', 'rate_type'
+    success_url = reverse_lazy('rate:rate_list')
+
+
+class DeleteRate(DeleteView):
+    model = Rate
+    success_url = reverse_lazy('rate:rate_list')
+
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
