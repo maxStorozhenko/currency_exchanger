@@ -1,0 +1,118 @@
+from account.models import Contact
+
+from django.conf import settings
+from django.core import mail
+from django.urls import reverse
+
+
+def test_contact_us_get_form(client):
+    url = reverse('account:contact-us')
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+def test_contact_us_empty_payload(client):
+    initial_count = Contact.objects.count()
+    assert len(mail.outbox) == 0
+    url = reverse('account:contact-us')
+    response = client.post(url, {})
+    assert response.status_code == 200
+    errors = response.context_data['form'].errors
+    assert len(errors) == 3
+    assert errors['email_from'] == ['This field is required.']
+    assert errors['subject'] == ['This field is required.']
+    assert errors['message'] == ['This field is required.']
+    assert Contact.objects.count() == initial_count
+    assert len(mail.outbox) == 0
+
+
+def test_contact_us_incorrect_email(client):
+    initial_count = Contact.objects.count()
+    assert len(mail.outbox) == 0
+    url = reverse('account:contact-us')
+    payload = {
+        'email_from': 'mailmail',
+        'subject': 'hello world',
+        'message': 'hello world',
+    }
+    response = client.post(url, payload)
+    assert response.status_code == 200
+    errors = response.context_data['form'].errors
+    assert len(errors) == 1
+    assert errors['email_from'] == ['Enter a valid email address.']
+    assert Contact.objects.count() == initial_count
+    assert len(mail.outbox) == 0
+
+
+def test_contact_us_correct_payload(client):
+    initial_count = Contact.objects.count()
+    assert len(mail.outbox) == 0
+    url = reverse('account:contact-us')
+    payload = {
+        'email_from': 'mailmail@mail.com',
+        'subject': 'hello world',
+        'message': 'hello world',
+    }
+    response = client.post(url, payload)
+    assert response.status_code == 302
+    assert Contact.objects.count() == initial_count + 1
+    assert len(mail.outbox) == 1
+    email = mail.outbox[0]
+    assert email.subject == payload['subject']
+    assert email.body == payload['message']
+    assert email.from_email == payload['email_from']
+    assert email.to == [settings.DEFAULT_FROM_EMAIL]
+
+
+def test_login_get_form(client):
+    url = reverse('account:login')
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.template_name == ['registration/login.html']
+
+
+def test_login_empty_fields(client):
+    url = reverse('account:login')
+    response = client.post(url, {})
+    assert response.status_code == 200
+    errors = response.context_data['form'].errors
+    assert len(errors) == 2
+    assert errors['username'] == ['This field is required.']
+    assert errors['password'] == ['This field is required.']
+
+
+def test_login_incorrect_data(client):
+    url = reverse('account:login')
+    payload = {
+        'username': 'admin',
+        'password': '123456',
+    }
+    response = client.post(url, payload)
+    assert response.status_code == 200
+    errors = response.context_data['form'].errors
+    assert len(errors) == 1
+    assert errors['__all__'] == ['Please enter a correct username and password. Note that both fields may be '
+                                 'case-sensitive.']
+
+
+def test_login_correct_data(admin_client):
+    url = reverse('account:login')
+    payload = {
+        'username': 'admin',
+        'password': 'password',
+    }
+    response = admin_client.post(url, payload)
+    assert response.status_code == 302
+    assert response.wsgi_request.user.is_superuser is True
+    assert response.wsgi_request.user.username == 'admin'
+    assert response.wsgi_request.user.is_authenticated is True
+    assert response.wsgi_request.user.id == 1
+    assert response.url == reverse('index')
+
+
+def test_logout(admin_client):
+    url = reverse('account:logout')
+    response = admin_client.get(url)
+    assert response.wsgi_request.user.is_authenticated is False
+    assert response.status_code == 302
+    assert response.url == reverse('index')

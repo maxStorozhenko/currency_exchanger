@@ -10,8 +10,8 @@
 			<li class="nav-item {{ request.path|active:'index' }}">
 				<a class="nav-link" href="{% url 'index' %}">Home</a>
 			</li>
-			<li class="nav-item {{  request.path|active:'rate:rate_list' }}">
-				<a class="nav-link" href="{% url 'rate:rate_list' %}">Rates</a>
+			<li class="nav-item {{  request.path|active:'rate:list' }}">
+				<a class="nav-link" href="{% url 'rate:list' %}">Rates</a>
 			</li>
 			<li class="nav-item {{ 'rate:latest-rates' }}">
 				<a class="nav-link" href="{% url 'rate:latest-rates' %}">Latest Rates</a>
