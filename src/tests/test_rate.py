@@ -83,3 +83,34 @@ def test_delete_rate(admin_client):
     assert response.status_code == 302
     assert response.url == reverse('rate:list')
     assert Rate.objects.count() == initial_count - 1
+
+
+def test_delete_rate_with_common_user(client, django_user_model):
+    username = 'user1'
+    password = 'pass'
+    django_user_model.objects.create_user(username=username, password=password)
+    client.login(username=username, password=password)
+    initial_count = Rate.objects.count()
+    pk = random.randint(1, initial_count)
+    url = reverse('rate:delete', args=(pk,))
+    response = client.get(url)
+    assert response.wsgi_request.user.is_authenticated is True
+    assert response.wsgi_request.user.is_superuser is False
+    assert response.status_code == 403
+    assert response.content == b'<h1>403 Forbidden</h1>'
+    assert Rate.objects.count() == initial_count
+
+
+def test_edit_rate_with_common_user(client, django_user_model):
+    username = 'user1'
+    password = 'pass'
+    django_user_model.objects.create_user(username=username, password=password)
+    client.login(username=username, password=password)
+    objects_count = Rate.objects.count()
+    pk = random.randint(1, objects_count)
+    url = reverse('rate:edit', args=(pk,))
+    response = client.get(url)
+    assert response.wsgi_request.user.is_authenticated is True
+    assert response.wsgi_request.user.is_superuser is False
+    assert response.status_code == 403
+    assert response.content == b'<h1>403 Forbidden</h1>'
