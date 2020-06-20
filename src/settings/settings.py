@@ -98,6 +98,7 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, '..', 'static_content', 'static')
 
 INTERNAL_IPS = [
     '127.0.0.1',
