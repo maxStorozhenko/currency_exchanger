@@ -4,6 +4,9 @@ from celery.schedules import crontab
 
 from django.urls import reverse_lazy
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'fp_grwa77&d75%01dziwslea2*t*(fmas6rrbyg+nbr%k$$wr8'
@@ -119,6 +122,15 @@ LOGIN_REDIRECT_URL = reverse_lazy('index')
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+sentry_sdk.init(
+    dsn="https://9e2d38880320451a8bcb7db14330ddec@o411670.ingest.sentry.io/5287232",
+    integrations=[DjangoIntegration()],
+
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True
+)
 
 try:
     from settings.settings_local import *  # noqa
