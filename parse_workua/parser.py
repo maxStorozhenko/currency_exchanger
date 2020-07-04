@@ -57,10 +57,7 @@ while True:
 
         # get salary
         res = vacancy_soup.find('b', {'class': 'text-black'})
-        if res is not None:
-            salary = str(res.string)
-        else:
-            salary = '-'
+        salary = '-' if res is None else str(res.string)
 
         # get city
         res = vacancy_soup.find('p', {'class': 'text-indent add-top-sm'})
