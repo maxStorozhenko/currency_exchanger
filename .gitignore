@@ -8,3 +8,6 @@ celerybeat.pid
 settings_local.py
 *.db
 *.json
+/tmp/
+*.gz
+/parse_workua/work_ua.txt
