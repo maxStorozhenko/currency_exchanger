@@ -22,6 +22,6 @@ class ChangePassword(LoginRequiredMixin, UpdateView):
     form_class = ChangePasswordForm
 
     def get_form_kwargs(self):
-        kwargs = super(ChangePassword, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs.update({'user': self.request.user})
         return kwargs
