@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetDoneView, \
     PasswordResetView
@@ -14,6 +15,8 @@ urlpatterns = [
 
     path('account/', include('account.urls')),
     path('rate/', include('rate.urls')),
+
+    ########
     path('password-reset/', PasswordResetView.as_view(
         template_name='registration/password-reset.html'), name='password_reset'),
     path('password-reset/done/', PasswordResetDoneView.as_view(
@@ -23,6 +26,10 @@ urlpatterns = [
     path('password-reset-complete/', PasswordResetCompleteView.as_view(
         template_name='registration/password-reset-complete.html'), name='password_reset_complete'),
     path('password_change/<int:pk>/', views.ChangePassword.as_view(), name='password_change'),
+    #######
+
+    path('api/v1/rate/', include('rate.api.urls')),
+    path('api/v1/user/', include('account.api.urls')),
 ]
 
 if settings.DEBUG:
@@ -30,7 +37,7 @@ if settings.DEBUG:
 
     urlpatterns = [
                       path('__debug__/', include(debug_toolbar.urls)),
-                  ] + urlpatterns
+                  ] + urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 handler404 = views.handler404

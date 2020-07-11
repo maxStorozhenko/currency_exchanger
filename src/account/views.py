@@ -27,12 +27,18 @@ class ContactUs(CreateView):
 class MyProfile(LoginRequiredMixin, UpdateView):
     template_name = 'user-edit.html'
     model = User
-    fields = 'email', 'first_name', 'last_name', 'username'
+    fields = 'email', 'first_name', 'last_name', 'username', 'avatar'
     success_url = reverse_lazy('index')
 
     def get_object(self, queryset=None):
         obj = self.get_queryset().get(id=self.request.user.id)
         return obj
+
+    def post(self, request, *args, **kwargs):
+        new_avatar = request._post['avatar']
+        request.user.avatar = new_avatar
+        request.user.save()
+        return super().post(request, *args, **kwargs)
 
 
 class SignUp(CreateView):
