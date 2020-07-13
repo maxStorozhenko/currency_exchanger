@@ -15,19 +15,7 @@ urlpatterns = [
 
     path('account/', include('account.urls')),
     path('rate/', include('rate.urls')),
-
-    ########
-    path('password-reset/', PasswordResetView.as_view(
-        template_name='registration/password-reset.html'), name='password_reset'),
-    path('password-reset/done/', PasswordResetDoneView.as_view(
-         template_name='registration/password-reset-done.html'), name='password_reset_done'),
-    path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(
-        template_name='registration/password-reset-conf.html'), name='password_reset_confirm'),
-    path('password-reset-complete/', PasswordResetCompleteView.as_view(
-        template_name='registration/password-reset-complete.html'), name='password_reset_complete'),
-    path('password_change/<int:pk>/', views.ChangePassword.as_view(), name='password_change'),
-    #######
-
+    path('auth/', include('django.contrib.auth.urls')),
     path('api/v1/rate/', include('rate.api.urls')),
     path('api/v1/user/', include('account.api.urls')),
 ]
