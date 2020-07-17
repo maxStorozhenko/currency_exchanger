@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_extensions',
     'crispy_forms',
+    'rest_framework',
 
     'account',
     'rate',
@@ -46,7 +47,8 @@ ROOT_URLCONF = 'settings.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),
+                 os.path.join(BASE_DIR, 'account', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -103,13 +105,21 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '..', 'static_content', 'static')
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'static_content', 'media')
+
+
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
 AUTH_USER_MODEL = 'account.User'
 
-CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = 'amqp://currency:currency@localhost:5672//'
+
+CELERY = {
+    'BROKER_URL': os.environ['CELERY_BROKER'],
+}
 
 CELERY_BEAT_SCHEDULE = {
     'parse': {
