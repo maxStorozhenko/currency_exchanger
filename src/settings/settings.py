@@ -115,7 +115,11 @@ INTERNAL_IPS = [
 
 AUTH_USER_MODEL = 'account.User'
 
-CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_BROKER_URL = 'amqp://currency:currency@localhost:5672//'
+
+CELERY = {
+    'BROKER_URL': os.environ['CELERY_BROKER'],
+}
 
 CELERY_BEAT_SCHEDULE = {
     'parse': {
