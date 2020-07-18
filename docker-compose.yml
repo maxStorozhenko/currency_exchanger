@@ -3,36 +3,106 @@ version: "3.3"
 services:
   memcached:
     image: memcached:latest
+    env_file: .env
+    hostname: ${MEMCACHED_HOST}
     container_name: memcached
     restart: always
-    ports:
-    - "11211:11211"
 
   rabbitmq:
     image: rabbitmq:3.8-rc-management
     container_name: rabbitmq
     env_file: .env
+    hostname: ${RABBITMQ_DEFAULT_HOST}
     restart: always
-    ports:
-      - "5672:5672"
 
   backend:
-    env_file: .env
     build: .
     container_name: backend
     # command: tail -f /dev/null
-    command: python ./src/manage.py runserver 0:8000
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: 'settings.settings'
+    command: ./commands/wsgi/${SERVER}.sh
     restart: always
+    depends_on:
+      - memcached
+      - rabbitmq
     ports:
       - "8000:8000"
     volumes:
     - ./:/srv/project
 
-#  worker:
-#    build: .
-#    restart: always
-#    container_name: worker
-#    env_file: .env
-#    command: bash -c cd src/ && celery worker settings --concurrency=1 --loglevel=INFO
-#    depends_on:
-#      - rabbitmq
+  celery:
+    build: .
+    container_name: celery
+    env_file: .env
+    command: ./commands/celery/start_celery.sh
+    restart: always
+    depends_on:
+      - memcached
+      - rabbitmq
+      - backend
+    volumes:
+      - ./:/srv/project
+
+  celerybeat:
+    build: .
+    container_name: celerybeat
+    env_file: .env
+    command: ./commands/celery/start_celerybeat.sh
+    restart: always
+    depends_on:
+      - memcached
+      - rabbitmq
+      - backend
+    volumes:
+      - ./:/srv/project
+
+  postgres:
+    image: postgres:12.3-alpine
+    container_name: postgres
+    hostname: ${POSTGRES_HOST}
+    env_file: .env
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  nginx:
+    image: nginx:1.17.4-alpine
+    container_name: nginx
+    volumes:
+      - ./nginx:/etc/nginx/conf.d/
+      - ./static_content:/etc/nginx/static_content/
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  flower:
+    build: .
+    container_name: flower
+    env_file: .env
+    command: celery flower -A settings --port=5555 --workdir=/srv/project/src
+    volumes:
+      - ./:/srv/project
+    depends_on:
+      - backend
+    restart: always
+    ports:
+      - "5555:5555"
+
+volumes:
+  db_data: {}
+  portainer_data:

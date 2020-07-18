@@ -6,8 +6,10 @@ __pycache__/
 celerybeat-schedule
 celerybeat.pid
 settings_local.py
-*.db
 *.json
 /tmp/
 *.gz
 /parse_workua/work_ua.txt
+/src/db.sqlite3
+.env
+static_content/
