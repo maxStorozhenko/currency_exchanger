@@ -94,14 +94,14 @@ services:
     build: .
     container_name: flower
     env_file: .env
-    command: celery flower -A settings --port=5555 --workdir=/srv/project/src
+    command: celery flower -A settings --port=${FLOWER_PORT} --workdir=/srv/project/src
     volumes:
       - ./:/srv/project
     depends_on:
       - backend
     restart: always
     ports:
-      - "5555:5555"
+      - ${FLOWER_PORT}:${FLOWER_PORT}
 
 volumes:
   db_data: {}

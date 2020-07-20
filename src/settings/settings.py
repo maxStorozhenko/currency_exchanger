@@ -156,7 +156,7 @@ sentry_sdk.init(
 )
 
 EMAIL_HOST = os.environ['EMAIL_HOST']
-EMAIL_USE_TLS = bool(os.environ['EMAIL_USE_TLS'])
+EMAIL_USE_TLS = os.environ['EMAIL_USE_TLS'] == 'True'
 EMAIL_PORT = int(os.environ['EMAIL_PORT'])
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
