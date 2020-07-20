@@ -20,7 +20,7 @@ env:
   POSTGRES_PASSWORD="jsdo47d2YRTw24Asdf"
   POSTGRES_HOST="postgres"
   SECRET_KEY="fp_grwa77&d75%01dziwslea2*t*(fmas6rrbyg+nbr%k$$wr8"
-  SERVER="dev"
+  SERVER="production"
   ALLOWED_HOSTS="127.0.0.1,localhost,*"
   EMAIL_HOST="smtp.gmail.com"
   EMAIL_USE_TLS="True"
