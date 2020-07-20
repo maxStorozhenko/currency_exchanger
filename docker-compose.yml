@@ -63,6 +63,7 @@ services:
     image: postgres:12.3-alpine
     container_name: postgres
     hostname: ${POSTGRES_HOST}
+    command: python ./src/manage.py migrate
     env_file: .env
     restart: always
     volumes:
