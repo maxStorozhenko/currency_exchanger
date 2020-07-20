@@ -9,10 +9,10 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'fp_grwa77&d75%01dziwslea2*t*(fmas6rrbyg+nbr%k$$wr8'
+SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG = False
-ALLOWED_HOSTS = []
+DEBUG = os.environ['SERVER'] == 'dev'
+ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -63,17 +63,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'settings.wsgi.application'
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+    },
 }
 
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
+        'LOCATION': f'{os.environ["MEMCACHED_HOST"]}:11211',
     }
 }
 
@@ -94,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Kiev'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -115,11 +126,13 @@ INTERNAL_IPS = [
 
 AUTH_USER_MODEL = 'account.User'
 
-CELERY_BROKER_URL = 'amqp://currency:currency@localhost:5672//'
+# CELERY_BROKER_URL = 'amqp://currency:currency@localhost:5672//'
 
-CELERY = {
-    'BROKER_URL': os.environ['CELERY_BROKER'],
-}
+CELERY_BROKER_URL = 'amqp://{0}:{1}@{2}:5672//'.format(
+    os.environ.get('RABBITMQ_DEFAULT_USER', 'guest'),
+    os.environ.get('RABBITMQ_DEFAULT_PASS', 'guest'),
+    os.environ.get('RABBITMQ_DEFAULT_HOST', 'localhost')
+)
 
 CELERY_BEAT_SCHEDULE = {
     'parse': {
@@ -142,7 +155,11 @@ sentry_sdk.init(
     send_default_pii=True
 )
 
-try:
-    from settings.settings_local import *  # noqa
-except ImportError:
-    print('ImportError settings_local\n')  # noqa
+EMAIL_HOST = os.environ['EMAIL_HOST']
+EMAIL_USE_TLS = os.environ['EMAIL_USE_TLS'] == 'True'
+EMAIL_PORT = int(os.environ['EMAIL_PORT'])
+EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+EMAIL_BACKEND = os.environ['EMAIL_BACKEND']
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
