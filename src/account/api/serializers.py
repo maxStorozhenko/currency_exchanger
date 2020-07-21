@@ -1,8 +1,7 @@
-from account.models import User, Contact
+from account.models import Contact, User
+from account.tasks import send_email_async
 
 from rest_framework import serializers
-
-from account.tasks import send_email_async
 
 
 class AccountSerializer(serializers.ModelSerializer):

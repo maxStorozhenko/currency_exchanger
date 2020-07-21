@@ -1,5 +1,5 @@
 from account.api.serializers import AccountSerializer, ContactSerializer
-from account.models import User, Contact
+from account.models import Contact, User
 
 from rest_framework import generics
 

@@ -1,9 +1,8 @@
 from rate.api.serializers import RateSerializer
 from rate.models import Rate
+from rate.selectors import get_latest_rates
 
 from rest_framework import generics
-
-from rate.selectors import get_latest_rates
 
 
 class RateListCreateView(generics.ListCreateAPIView):
