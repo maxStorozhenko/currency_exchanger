@@ -44,12 +44,13 @@ def test_contact_us_incorrect_email(client):
     assert len(mail.outbox) == 0
 
 
-def test_contact_us_correct_payload(client):
+def test_contact_us_correct_payload(client, fake):
     initial_count = Contact.objects.count()
     assert len(mail.outbox) == 0
+    email = fake.email()
     url = reverse('account:contact-us')
     payload = {
-        'email_from': 'mailmail@mail.com',
+        'email_from': email,
         'subject': 'hello world',
         'message': 'hello world',
     }
@@ -116,3 +117,66 @@ def test_logout(admin_client):
     assert response.wsgi_request.user.is_authenticated is False
     assert response.status_code == 302
     assert response.url == reverse('index')
+
+
+def test_signup_form(client, fake):
+    url = reverse('account:sign-up')
+    email = fake.email()
+    password = fake.word()
+    payload = {
+        'email': email,
+        'password1': password,
+        'password2': password + 'wrong',
+    }
+
+    # passwords doesn't match
+    response = client.post(url, payload)
+    assert response.status_code == 200
+
+    # correct payload
+    payload['password2'] = password
+    response = client.post(url, payload)
+    assert response.status_code == 302
+
+    # user exists
+    response = client.post(url, payload)
+    assert response.status_code == 200
+    errors = response.context_data['form'].errors
+    assert len(errors) == 1
+    assert errors['email'] == ['User with given email exists!']
+
+
+def test_change_password_form(client, django_user_model, fake):
+    url = reverse('password_change')
+    username = fake.name()
+    password = 'Notcommonpassword'
+    new_password = 'Newcommonpassword'
+    django_user_model.objects.create_user(username=username, password=password)
+    client.login(username=username, password=password)
+
+    # empty payload
+    response = client.post(url)
+    assert response.status_code == 200
+    errors = response.context_data['form'].errors
+    assert len(errors) == 3
+    assert errors['old_password'] == ['This field is required.']
+    assert errors['new_password1'] == ['This field is required.']
+    assert errors['new_password2'] == ['This field is required.']
+
+    # incorrect password
+    payload = {
+        'old_password': fake.word(),
+        'new_password1': new_password,
+        'new_password2': new_password,
+    }
+    response = client.post(url, payload)
+    assert response.status_code == 200
+    errors = response.context_data['form'].errors
+    assert len(errors) == 1
+    assert errors['old_password'] == ['Your old password was entered incorrectly. Please enter it again.']
+
+    # correct payload
+    payload['old_password'] = password
+    response = client.post(url, payload)
+    assert response.status_code == 302
+    assert response.wsgi_request.user.username == username
