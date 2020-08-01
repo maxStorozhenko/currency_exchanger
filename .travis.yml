@@ -5,11 +5,9 @@ install:
   - pip install -r requirements.txt
 script:
   - flake8 ./src
-  - python ./src/manage.py validate_templates
-  - python ./src/manage.py check
-#  - python ./src/manage.py makemigrations --check --dry-run
   - pip check
-  - pytest ./src/tests -s
+  - pytest ./src/tests --cov=src --cov-fail-under=90
+
 env:
   RABBITMQ_DEFAULT_USER="user"
   RABBITMQ_DEFAULT_PASS="password"

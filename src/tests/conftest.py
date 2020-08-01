@@ -1,5 +1,7 @@
 from django.core.management import call_command
 
+from faker import Faker
+
 import pytest
 
 from pytest_django.fixtures import _django_db_fixture_helper
@@ -20,3 +22,8 @@ def db_session(request, django_db_setup, django_db_blocker):
 def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command('loaddata', './src/tests/fixtures/rates.json')
+
+
+@pytest.fixture(scope='session', autouse=True)
+def fake():
+    yield Faker()

@@ -1,5 +1,6 @@
 import random
 
+from django.core.cache import cache
 from django.urls import reverse
 
 from rate.models import Rate
@@ -28,6 +29,7 @@ def test_rate_xlsx(client):
 
 def test_latest_rates(client):
     url = reverse('rate:latest-rates')
+    cache.clear()
     response = client.get(url)
     assert response.status_code == 200
     assert response.template_name == ['latest-rates.html']
