@@ -6,7 +6,8 @@ install:
 script:
   - flake8 ./src
   - pip check
-  - pytest ./src/tests -s
+  - pytest ./src/tests --cov=src --cov-fail-under=90
+
 env:
   RABBITMQ_DEFAULT_USER="user"
   RABBITMQ_DEFAULT_PASS="password"

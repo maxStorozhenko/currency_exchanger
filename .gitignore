@@ -13,3 +13,4 @@ settings_local.py
 /src/db.sqlite3
 .env
 static_content/
+/.coverage

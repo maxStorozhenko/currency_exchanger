@@ -1,0 +1,675 @@
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    $(function () {
+        let tmp = $(".department"),
+            $block = $(tmp[tmp.length - 1]),
+            $win = $(window),
+            local = $('html').attr('lang');
+
+        if ($block.length > 0) {
+
+            function toggleRegionsTabs() {
+                $(".course-regions-tabs .course-regions-tabs__tab").toggleClass(
+                    "course-regions-tabs__tab--active"
+                );
+            }
+
+            $(".toggle-regions").click(function (event) {
+                event.preventDefault();
+                toggleRegionsTabs();
+            });
+
+            $(".department-courses__link").click(function (event) {
+                event.preventDefault();
+                $(this)
+                    .toggleClass("department-courses__link--active")
+                    .parents(".department-courses")
+                    .find(".department-courses__body")
+                    .slideToggle(300);
+            });
+
+            // Получить отступ от верхней точки страницы до блока
+            let getTopOffset = () => $block.offset().top;
+
+            let sendCoords = (lat, lon) => {
+                let data = new FormData();
+                data.append("lat", lat);
+                data.append("lon", lon);
+
+                var settings = {
+                    async: true,
+                    crossDomain: true,
+                    url: "/coordinates",
+                    method: "POST",
+                    headers: {
+                        "cache-control": "no-cache"
+                    },
+                    processData: false,
+                    contentType: false,
+                    mimeType: "multipart/form-data",
+                    data: data
+                };
+
+                $.ajax(settings).done(function (response) {
+                    var regID = $.parseJSON(response).data.region_id;
+                    setExchangeRates($.parseJSON(response), regID);
+                });
+            };
+
+            let checkBlock = () => {
+                if ($win.scrollTop() + $win.height() >= tmp.offset().top) {
+                    if ("geolocation" in navigator) {
+                        navigator.geolocation.getCurrentPosition(
+                            function (position) {
+                                // console.log(position);
+                                sendCoords(
+                                    position.coords.latitude,
+                                    position.coords.longitude
+                                );
+                            },
+                            function (error) {
+                                // console.log("эрор");
+                                console.error(error);
+                            }
+                        );
+                    } else {
+                        console.log("Geolocation is not supported");
+                    }
+                    $window.off("scroll", checkBlock);
+                    $window.off("resize", listenerResize);
+                }
+            };
+
+            // Обработчик на ресайз
+            let listenerResize = () => {
+                blockHeight = $block.height();
+                viewportHeight = $window.height();
+                block_top_offset = getTopOffset();
+            };
+
+            let $window = $(window);
+            let blockHeight = $block.height();
+            let viewportHeight = $window.height();
+            let block_top_offset = getTopOffset();
+
+            $(document).ready(checkBlock);
+            $window.on("scroll", checkBlock);
+            $window.on("resize", listenerResize);
+
+            var baseUsdBuy = $("[data-currency=USD_BUY]").text(),
+                baseUsdSale = $("[data-currency=USD_SALE]").text(),
+                baseRubBuy = $("[data-currency=RUB_BUY]").text(),
+                baseRubSale = $("[data-currency=RUB_SALE]").text(),
+                baseEurBuy = $("[data-currency=EUR_BUY]").text(),
+                baseEurSale = $("[data-currency=EUR_SALE]").text();
+
+            var restoreBaseRates = () => {
+                $("#usd_buy").text(baseUsdBuy);
+                $("#usd_sale").text(baseUsdSale);
+                $("#rub_buy").text(baseRubBuy);
+                $("#rub_sale").text(baseRubSale);
+                $("#eur_buy").text(baseEurBuy);
+                $("#eur_sale").text(baseEurSale);
+            };
+
+            var setExchangeRates = (res, regID) => {
+                let usdBuy = $("[data-currency=USD_BUY]"),
+                    usdSale = $("[data-currency=USD_SALE]"),
+                    rubBuy = $("[data-currency=RUB_BUY]"),
+                    rubSale = $("[data-currency=RUB_SALE]"),
+                    eurBuy = $("[data-currency=EUR_BUY]"),
+                    eurSale = $("[data-currency=EUR_SALE]"),
+                    tableBody = $(".department-courses__table"),
+                    region = $("#exchangeLocation"),
+                    resJson = res,
+                    usd_buy,
+                    usd_sale,
+                    rub_buy,
+                    rub_sale,
+                    eur_buy,
+                    eur_sale;
+
+                region.text(resJson.data.region + ' ' + 'область');
+
+                if (
+                    resJson.data.currency.buy.length != 0 &&
+                    resJson.data.currency.sale.length != 0
+                ) {
+                    usd_buy = resJson.data.currency.buy[0].usd_buy;
+                    usd_sale = resJson.data.currency.sale[0].usd_sale;
+
+                    rub_buy = resJson.data.currency.buy[0].rub_buy;
+                    rub_sale = resJson.data.currency.sale[0].rub_sale;
+
+                    eur_buy = resJson.data.currency.buy[0].eur_buy;
+                    eur_sale = resJson.data.currency.sale[0].eur_sale;
+
+                    usd_buy == "" || usd_buy == undefined ? usdBuy.text(baseUsdBuy) : usdBuy.text(usd_buy);
+                    usd_sale == "" || usd_sale == undefined ? usdSale.text(baseUsdSale) : usdSale.text(usd_sale);
+
+                    rub_buy == "" || rub_buy == undefined ? rubBuy.text(baseRubBuy) : rubBuy.text(rub_buy);
+                    rub_sale == "" || rub_sale == undefined ? rubSale.text(baseRubSale) : rubSale.text(rub_sale);
+
+                    eur_buy == "" || eur_buy == undefined ? eurBuy.text(baseEurBuy) : eurBuy.text(eur_buy);
+                    eur_sale == "" || eur_sale == undefined ? eurSale.text(baseEurSale) : eurSale.text(eur_sale);
+                } else {
+                    // restoreBaseRates();
+                    showRegionStat(regID);
+                }
+
+                var generatedTable = "<tbody>";
+
+                for (var key in resJson.data.offices) {
+                    var elem = resJson.data.offices[key];
+                    if (elem.buy[0] && elem.sale[0]) {
+                        if (
+                            usd_buy != elem.buy[0].usd_buy ||
+                            usd_sale != elem.sale[0].usd_sale ||
+                            rub_buy != elem.buy[0].rub_buy ||
+                            rub_sale != elem.sale[0].rub_sale ||
+                            eur_buy != elem.buy[0].eur_buy ||
+                            eur_sale != elem.sale[0].eur_sale
+                        ) {
+                            generatedTable += "<tr>";
+                            generatedTable += "<td>" + localTitle(elem) + "</td>";
+                            generatedTable += "<td>" + elem.buy[0].usd_buy + "/" + elem.sale[0].usd_sale + "</td>";
+                            generatedTable += "<td>" + elem.buy[0].eur_buy + "/" + elem.sale[0].eur_sale + "</td>";
+                            generatedTable += "<td>" + elem.buy[0].rub_buy + "/" + elem.sale[0].rub_sale + "</td>";
+                            generatedTable += "</tr>";
+                        }
+                    }
+                }
+
+                tableBody.find("tbody").remove();
+                generatedTable += "</tbody>";
+                tableBody.find("thead").after(generatedTable);
+                if (tableBody.find("tbody").is(":empty")) {
+                    $(".currency-tab-block__departments").hide();
+                } else {
+                    $(".currency-tab-block__departments").show();
+                }
+            };
+
+            $("[data-location]").click(function (event) {
+                event.preventDefault();
+                $("[data-location]").removeClass("active");
+                $(this).addClass("active");
+
+                let locationData = $(this).data("location").split("/"),
+                    lat = locationData[0],
+                    lon = locationData[1];
+
+                sendCoords(lat, lon);
+                toggleRegionsTabs();
+            });
+
+
+            var localTitle = (obj) => {
+                let titleLang = 'title_' + local,
+                    out;
+                local === 'ua' ? out = obj.title : out = obj[titleLang]
+                return out;
+            }
+
+
+            // region stat settings
+            var optionParam = (actionMethod, regionID) => {
+
+                let settings = {
+                    async: true,
+                    crossDomain: true,
+                    url: "/regions",
+                    method: actionMethod,
+                    headers: {
+                        "cache-control": "no-cache"
+                    }
+                }
+
+                if (actionMethod == 'POST') {
+                    let form = new FormData();
+                    form.append("id", regionID);
+                    settings.processData = false
+                    settings.contentType = false
+                    settings.mimeType = "multipart/form-data"
+                    settings.data = form
+                }
+
+                return settings
+            }
+
+
+            // create regions
+            var createRegions = () => {
+                let settings = optionParam('GET');
+                $.ajax(settings).done(function (response) {
+                    let regions = response.data;
+                    let regionHTML = "<ul>";
+                    for (let key in regions) {
+                        regionHTML += '<li><a class="select-region" data-region-id="' + regions[key].id + '">' + localTitle(regions[key]) + "</a></li>";
+                    }
+                    regionHTML += "</ul>";
+                    $(".course-regions__container").html(regionHTML);
+
+                    // показ статистики по рекиону
+                    $(".select-region").click(function () {
+                        let regionID = $(this).data("regionId");
+                        showRegionStat(regionID);
+                        toggleRegionsTabs();
+                    });
+                });
+            };
+
+            createRegions();
+
+
+            // show region stat
+            var showRegionStat = regionID => {
+                let settingsOffices = optionParam('POST', regionID),
+                    settingsRegions = optionParam('GET'),
+
+                    jsonRegions = {
+                        data: {
+                            region: "default",
+                            currency: {},
+                            offices: {}
+                        }
+                    };
+
+                $.ajax(settingsOffices).done(function (response) {
+                    Object.assign(jsonRegions.data.offices, $.parseJSON(response).data);
+                    $.ajax(settingsRegions).done(function (response) {
+                        for (let key in response.data) {
+                            if (response.data[key].id == regionID) {
+                                jsonRegions.data.region = localTitle(response.data[key]);
+                                jsonRegions.data.currency = {
+                                    buy: [
+                                        {
+                                            usd_buy: response.data[key].usd_buy,
+                                            eur_buy: response.data[key].eur_buy,
+                                            rub_buy: response.data[key].rub_buy
+                                        }
+                                    ],
+                                    sale: [
+                                        {
+                                            usd_sale: response.data[key].usd_sale,
+                                            eur_sale: response.data[key].eur_sale,
+                                            rub_sale: response.data[key].rub_sale
+                                        }
+                                    ]
+                                };
+                            }
+                        }
+                        setExchangeRates(jsonRegions);
+                    })
+                })
+            }
+        }
+    });
+
+</script>
+
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta content="true" name="HandheldFriendly">
+<meta content="width" name="MobileOptimized">
+<meta content="yes" name="apple-mobile-web-app-capable">
+<title>Курс валют</title>
+<meta name="csrf-token" content="WwhAK6gRYgImCYZcIOLemnGYQ5GMg9627qdUp9Gh">
+
+<meta name="title" content="Обмін валют в Альфа-банку"/>
+<meta name="keywords" content=""/>
+<meta name="description" content="Миттєвий обмін валют за індивідуальним курсом. Звертайтеся до менеджерів в будь-якому відділенні Альфа-банку."/>
+
+<link rel="alternate" href="https://alfabank.ua/currency-exchange" hreflang="uk-ua"/>
+                            <link rel="alternate" href="https://alfabank.ua/currency-exchange" hreflang="x-default"/>
+                                            <link rel="alternate" href="https://alfabank.ua/ru/currency-exchange" hreflang="ru-ua"/>
+                                            <link rel="alternate" href="https://alfabank.ua/en/currency-exchange" hreflang="en-ua"/>
+
+
+
+<link rel="image_src" href="">
+
+<link rel="icon" href="https://alfabank.ua/favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="https://alfabank.ua/favicon.ico" type="image/x-icon"/>
+
+<script>
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", '/get-tkn');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function () {
+        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            document.getElementsByName("csrf-token")[0].setAttribute('content',JSON.parse(xhr.response).token);
+            document.getElementsByName("csrf-token")[0].value = JSON.parse(xhr.response).token;
+        }
+    };
+    xhr.send();
+</script>
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/landing_sass/currency-exchange-landing-css.css?id=dc18e25b5bda58f0e781">
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-NRKFTBH');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NRKFTBH"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header>
+    <div class="wrapper">
+        <a href="https://alfabank.ua/?refId=" target="_blank">
+            <img src="/images/currency-exchange-landing/header-logo.png" alt="Logo">
+        </a>
+        <div class="header-phone-block">
+            <div class="header-phone-image">
+                <a href="tel:3530">
+                    <img src="/images/currency-exchange-landing/header-phone.svg" alt="header-phone">
+                </a>
+                <div class="header-phone-title">Безкоштовно з мобільних</div>
+            </div>
+        </div>
+    </div>
+</header>
+<main>
+
+    <div class="wrapper" style="padding: 0px">
+        <div class="site-links">
+            <a href="#exchange-online" class="link">Обмін валют Online</a>
+            <a href="#exchange-individual" class="link">Індивідуальний курс</a>
+            <a href="#exchange-department" class="link">Обмін валют у відділенні</a>
+        </div>
+    </div>
+
+    <section id="exchange-online">
+
+        <div class="wrapper">
+            <div class="exchange-online-container">
+                <div class="img-block">
+                    <img src="/images/currency-exchange-landing/online-block.png" alt="Mobile">
+                </div>
+                <div class="content-block">
+                    <div class="content-block-title">Обмін валют у додатку Alfa-Mobile Ukraine</div>
+                    <ul class="content-block-list">
+                        <li>24/7, без черг та комісій</li>
+                        <li>курс покупки у додатку вигідніший, ніж курс у відділенні</li>
+                        <li>без обмеження максимальної суми</li>
+                        <li>прямий обмін між USD та EUR по більш вигідному курсу та без комісії</li>
+                        <li>віртуальна картка Fast Card для швидкого обміну Online</li>
+                    </ul>
+                    <div class="app-block">
+                        <div class="app-block-title">Завантажуй Alfa-Mobile Ukraine тут:</div>
+                        <div class="app-block-buttons">
+                            <img src="/images/currency-exchange-landing/ex6.png" width="121" class="qr">
+                            <div class="apps-container">
+                                <a href="https://hi.alfabank.ua/am_and_ex6"></a>
+                                <a href="https://hi.alfabank.ua/am_ios_ex6"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <section id="exchange-individual">
+        <div class="wrapper">
+            <div class="exchange-individual-container">
+                <div class="content-block">
+                    <div class="content-block-title">Твій персональний <br> курс валют</div>
+                    <div class="content-block-subtitle">При обміні від 10 000 $ або 10 000 €</div>
+                    <ul class="content-block-list">
+                        <li>звернись до менеждера та запропонуй свій курс або отримай вигідну індивідуальну пропозицію
+                        </li>
+                        <li>зафіксуй свій курс та резервуй зручний час для обміну протягом дня у менеджера</li>
+                        <li>обмінюй швидко та безпечно без обмеження максимальної суми</li>
+                    </ul>
+                    <a href="https://alfabank.ua/map?refId=" class="link-nearest" target="_blank">
+                        <img src="/images/currency-exchange-landing/location.png" alt="nearest">
+                        Знайти найближче відділення
+                    </a>
+                </div>
+                <div class="img-block">
+                    <img src="/images/currency-exchange-landing/money.png" alt="money">
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="exchange-department">
+        <div class="wrapper">
+            <div class="exchange-department-container">
+                <div class="img-block">
+                    <img src="/images/currency-exchange-landing/section_3.png" alt="Department">
+                </div>
+                <div class="content-block">
+                    <div class="content-block-title">Обмін валют <br> у касі відділення</div>
+                    <div class="content-block-subtitle">Зручно та вигідно</div>
+                    <ul class="content-block-list">
+                        <li>завжди поруч знайдеться відділення</li>
+                        <li>комфортно та безпечно</li>
+                        <li>обмін без обмеження максимальної суми</li>
+                    </ul>
+                    <a href="https://alfabank.ua/map?refId=" class="link-nearest" target="_blank">
+                        <img src="/images/currency-exchange-landing/location-purple.png" alt="nearest">
+                        Знайти найближче відділення
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="exchange">
+        <div class="wrapper">
+            <div class="exchange-title">
+                <span>Курс валют</span>
+                <span>27 липня 2020</span>
+            </div>
+            <div class="exchange-tabs">
+                <div class="exchange-tab active" data-tab="online">Операції Online</div>
+                <div class="exchange-tab" data-tab="department">Відділення</div>
+                <div class="exchange-tab" data-tab="by-cards">За розрахунки картками</div>
+            </div>
+            <div class="exchange-data online active">
+
+                                    <div class="exchange-data-item">
+                        <div class="exchange-data-currency">USD/UAH</div>
+                        <div class="exchange-data-currency-block">
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Купівля</div>
+                                <div class="currency-item-number">
+                                    27.65
+
+                                </div>
+                            </div>
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Продаж</div>
+                                <div class="currency-item-number">
+                                    27.86
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                    <div class="exchange-data-item">
+                        <div class="exchange-data-currency">EUR/UAH</div>
+                        <div class="exchange-data-currency-block">
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Купівля</div>
+                                <div class="currency-item-number">
+                                    32.17
+
+                                </div>
+                            </div>
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Продаж</div>
+                                <div class="currency-item-number">
+                                    32.65
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                                <!-- eur-usd-converter -->
+                <div class="exchange-data-item">
+                    <div class="exchange-data-currency"> EUR/USD </div>
+                    <div class="exchange-data-currency-block">
+                        <div class="exchange-data-currency-item">
+                            <div class="currency-item-action">Купівля</div>
+                            <div class="currency-item-number eur-usd-converter">
+                                <span>1.16</span>
+                            </div>
+                        </div>
+                        <div class="exchange-data-currency-item eur-usd-converter">
+                            <div class="currency-item-action">Продаж</div>
+                            <div class="currency-item-number">
+                                <span>1.18</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+            <div class="exchange-data department">
+
+
+                    <div class="exchange-data-item">
+                        <div class="exchange-data-currency"> USD</div>
+                        <div class="exchange-data-currency-block">
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Купівля</div>
+                                <div class="currency-item-number">
+
+                                     <span class="rate-number" data-currency="USD_BUY">
+									27.60
+                                         								</span>
+
+                                </div>
+                            </div>
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Продаж</div>
+                                <div class="currency-item-number">
+
+                                     <span class="rate-number" data-currency="USD_SALE">
+									27.88
+                                         								</span>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="exchange-data-item">
+                        <div class="exchange-data-currency"> EUR</div>
+                        <div class="exchange-data-currency-block">
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Купівля</div>
+                                <div class="currency-item-number">
+
+                                     <span class="rate-number" data-currency="EUR_BUY">
+									32.15
+                                         								</span>
+
+                                </div>
+                            </div>
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Продаж</div>
+                                <div class="currency-item-number">
+
+                                     <span class="rate-number" data-currency="EUR_SALE">
+									32.67
+                                         								</span>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="exchange-data-item">
+                        <div class="exchange-data-currency"> RUB</div>
+                        <div class="exchange-data-currency-block">
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Купівля</div>
+                                <div class="currency-item-number">
+
+                                     <span class="rate-number" data-currency="RUB_BUY">
+									0.372
+                                         								</span>
+
+                                </div>
+                            </div>
+                            <div class="exchange-data-currency-item">
+                                <div class="currency-item-action">Продаж</div>
+                                <div class="currency-item-number">
+
+                                     <span class="rate-number" data-currency="RUB_SALE">
+									0.387
+                                         								</span>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+            </div>
+
+                            <div class="exchange-data by-cards">
+                                                                        <div class="exchange-data-item">
+                                <div class="exchange-data-currency">USD</div>
+                                <div class="exchange-data-currency-block">
+                                    <div class="exchange-data-currency-item">
+                                        <div class="currency-item-action">Купівля</div>
+                                        <div
+                                            class="currency-item-number">27.65</div>
+                                    </div>
+                                    <div class="exchange-data-currency-item">
+                                        <div class="currency-item-action">Продаж</div>
+                                        <div
+                                            class="currency-item-number">28.35</div>
+                                    </div>
+                                </div>
+                            </div>
+                                                                                                <div class="exchange-data-item">
+                                <div class="exchange-data-currency">EUR</div>
+                                <div class="exchange-data-currency-block">
+                                    <div class="exchange-data-currency-item">
+                                        <div class="currency-item-action">Купівля</div>
+                                        <div
+                                            class="currency-item-number">31.90</div>
+                                    </div>
+                                    <div class="exchange-data-currency-item">
+                                        <div class="currency-item-action">Продаж</div>
+                                        <div
+                                            class="currency-item-number">32.80</div>
+                                    </div>
+                                </div>
+                            </div>
+                                                            </div>
+                    </div>
+    </section>
+
+</main>
+<footer>
+    <div class="wrapper">
+        <p>АТ «Альфа-Банк». У Державному реєстрі банків № 158.</p>
+        <p>Ліцензія НБУ № 61 від 05.10.2011 р. Усі види банківських послуг.</p>
+    </div>
+</footer>
+
+<script src="/js/currency-exchange-landing.js"></script>
+</body>
+</html>

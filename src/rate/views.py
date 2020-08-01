@@ -101,10 +101,6 @@ class LatestRatesView(TemplateView):
         return context
 
 
-def superuser_check(user):
-    return user.is_superuser
-
-
 class EditRate(UserPassesTestMixin, UpdateView):
     template_name = 'edit-rate.html'
     model = Rate
