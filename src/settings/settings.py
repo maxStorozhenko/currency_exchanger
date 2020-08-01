@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     'drf_yasg',
+    'django_filters',
 
     'account',
     'rate',
@@ -120,7 +121,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, '..', 'static_content', 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'static_content', 'media')
 
-
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
@@ -170,7 +170,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 REST_USE_JWT = True

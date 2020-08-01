@@ -3,8 +3,11 @@ import csv
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import DeleteView, ListView, TemplateView, UpdateView, View
+from django.views.generic import DeleteView, TemplateView, UpdateView, View
 
+from django_filters.views import FilterView
+
+from rate.filters import RateFilter
 from rate.models import Rate
 from rate.selectors import get_latest_rates
 from rate.utils import display
@@ -12,10 +15,11 @@ from rate.utils import display
 import xlsxwriter
 
 
-class RateList(ListView):
+class RateList(FilterView):
     paginate_by = 24
     queryset = Rate.objects.all()
     template_name = 'rate-list.html'
+    filterset_class = RateFilter
 
 
 class RateDownloadCSV(View):

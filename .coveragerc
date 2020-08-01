@@ -6,6 +6,7 @@ omit = src/manage.py,
        */tests/*,
        src/settings/settings*.py,
        src/settings/wsgi*.py,
+       src/rate/templatetags/pagination.py
 
 [report]
 precision = 4
