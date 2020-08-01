@@ -7,4 +7,5 @@ app_name = 'api-rate'
 urlpatterns = [
     path('rates/', views.RateListCreateView.as_view(), name='rates'),
     path('rates/<int:pk>/', views.RateReadUpdateDeleteView.as_view(), name='rate'),
+    path('latest-rates/', views.LatestRatesListView.as_view(), name='latest_rates'),
 ]
