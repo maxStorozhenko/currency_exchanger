@@ -3,6 +3,9 @@
 {% block title %}Latest Rates{% endblock title %}
 
 {% block content %}
+    <button type="button" class="btn btn-dark reload-rates-js">
+        Reload Rates
+    </button>
 <table class="table">
   <thead class="thead-dark">
     <tr>
@@ -31,3 +34,40 @@
   </tbody>
 </table>
 {% endblock content %}
+
+{% block extra_js %}
+    <script>
+        $(document).ready(function () {
+            $("table").click(function () {
+                alert('hello');
+
+            // start
+            $(".reload-rates-js").click(function () {
+                $("tbody tr").remove();
+                $.get('/api/v1/rate/latest-rates/').done(function (data) {
+
+                    let i;
+
+                    for (i = 0; i < data.length; i++) {
+                        let item = data[i];
+                        $('tbody:last-child').append(
+                            '<tr>' +
+                            '<th>1</th>' +
+                            `<td>${item.id}</td>` +
+                            `<td>${item.created}</td>` +
+                            `<td>${item.get_source_display}</td>` +
+                            `<td>${item.amount}</td>` +
+                            `<td>${item.get_type_display}</td>` +
+                            `<td>${item.get_currency_type_display}</td>` +
+                            '</tr>'
+                        );
+                    }
+
+                });
+            });
+            // end
+
+
+        });
+    </script>
+{% endblock extra_js %}
