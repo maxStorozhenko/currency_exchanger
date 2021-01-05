@@ -10,7 +10,6 @@ settings_local.py
 /tmp/
 *.gz
 /parse_workua/work_ua.txt
-/src/db.sqlite3
 .env
 static_content/
 /.coverage
