@@ -13,7 +13,7 @@ coverage==5.2.1
 decorator==4.4.2
 Django==2.2.13
 django-crispy-forms==1.9.2
-django-debug-toolbar==2.2
+django-debug-toolbar==2.2.1
 django-extensions==2.2.9
 django-filter==2.3.0
 django-silk==4.0.1
